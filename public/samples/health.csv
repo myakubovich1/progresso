@@ -1,0 +1,7 @@
+date,metric,value,unit,source,is_demo
+2026-09-17,sleep_duration,7.5,h,Sample export,true
+2026-09-17,steps,8200,steps,Sample export,true
+2026-09-17,cardio_minutes,0,min,Sample export,true
+2026-09-18,sleep_duration,7.2,h,Sample export,true
+2026-09-18,steps,9100,steps,Sample export,true
+2026-09-18,strength_minutes,45,min,Sample export,true

@@ -1,0 +1,12 @@
+{
+  "records": [
+    {
+      "date": "2026-09-18",
+      "metric": "steps",
+      "value": 8200,
+      "unit": "steps",
+      "source": "Sample export",
+      "is_demo": true
+    }
+  ]
+}
