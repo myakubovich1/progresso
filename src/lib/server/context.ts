@@ -12,7 +12,11 @@ export function checkOrigin(request: Request) {
     const localHosts = new Set(['localhost', '127.0.0.1', '[::1]']);
     const sameOrigin = received.origin === target.origin;
     const localEquivalent = localHosts.has(received.hostname) && localHosts.has(target.hostname) && received.port === target.port;
-    if (!sameOrigin && !localEquivalent) fail(403, 'cross_origin', 'Cross-origin requests are not allowed');
+    const previewOrigin = process.env.BASE44_PUBLIC_HOST_SUFFIX
+      ? `https://3000-${process.env.BASE44_PUBLIC_HOST_SUFFIX}`
+      : null;
+    const previewAllowed = previewOrigin !== null && received.origin === previewOrigin;
+    if (!sameOrigin && !localEquivalent && !previewAllowed) fail(403, 'cross_origin', 'Cross-origin requests are not allowed');
   }
   if (request.headers.get('sec-fetch-site') === 'cross-site')
     fail(403, 'cross_origin', 'Cross-site requests are not allowed');
@@ -22,7 +26,11 @@ function demoId(token: string) {
   return `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-a${h.slice(17, 20)}-${h.slice(20, 32)}`;
 }
 export function assertLocal(request: Request) {
-  if (!['localhost', '127.0.0.1', '[::1]'].includes(new URL(request.url).hostname))
+  const hostname = new URL(request.url).hostname;
+  const localHosts = ['localhost', '127.0.0.1', '[::1]', '0.0.0.0'];
+  const sandboxDomain = process.env.BASE44_SANDBOX_HOST_DOMAIN;
+  const previewHost = sandboxDomain && hostname.endsWith('.' + sandboxDomain);
+  if (!localHosts.includes(hostname) && !previewHost)
     fail(403, 'local_only', 'Local demo mode is not a public hosting backend');
 }
 export async function startDemo(request: Request) {
