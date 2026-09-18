@@ -2,5 +2,12 @@
   "previewPort": 3000,
   "healthPath": "/",
   "startCommand": "docker compose -f docker-compose.base44.yml up -d",
-  "secrets": []
+  "secrets": [
+    {
+      "name": "OPENAI_API_KEY",
+      "description": "OpenAI API key from https://platform.openai.com/api-keys — enables the real AI file/meal analysis",
+      "requiredAtBoot": false,
+      "generatedForDevelopment": false
+    }
+  ]
 }
