@@ -3,7 +3,9 @@ import { summarize, trends } from './analytics';
 import { proposeRecommendation } from './recommendations';
 
 // Deterministic retrieval prevents fabricated medical advice or untraceable numbers.
-// A future language layer can paraphrase this evidence packet without changing facts.
+// The AI language layer (server/ai.ts) paraphrases evidence packets without changing facts.
+export const medicalPattern =
+  /diagnos|disease|medicat|blood pressure|chest pain|faint|symptom|glucose|lab result|concerning|abnormal/i;
 export function answerQuestion(
   question: string,
   state: State,
@@ -12,11 +14,7 @@ export function answerQuestion(
   to?: string,
 ) {
   const q = question.toLowerCase();
-  if (
-    /diagnos|disease|medicat|blood pressure|chest pain|faint|symptom|glucose|lab result|concerning|abnormal/.test(
-      q,
-    )
-  )
+  if (medicalPattern.test(q))
     return {
       answer: `Progresso cannot interpret medical findings or diagnose conditions. Please discuss these findings or symptoms with a qualified clinician.`,
       evidence: [],

@@ -19,12 +19,12 @@ import {
 import { summarize, trends, dailyMetrics } from '@/lib/domain/analytics';
 import { proposeRecommendation } from '@/lib/domain/recommendations';
 import { demoRecords } from '@/lib/domain/demo';
-import { answerQuestion } from '@/lib/domain/chat';
+import { answerQuestion, medicalPattern } from '@/lib/domain/chat';
 import { context, checkOrigin, startDemo, demoEnabled, rateLimit, boundedBody } from './context';
 import { type Repository } from './repository';
 import { ApiError, fail } from './errors';
 import { validateFile } from './parsers';
-import { extract } from './ai';
+import { chatAnswer, extract } from './ai';
 
 const recordsInput = z.object({ records: z.array(observationSchema).min(1).max(2000) }).strict();
 const analyzeInput = z
@@ -375,6 +375,40 @@ async function dispatch(request: NextRequest, segments: string[]) {
       (input.from > input.to || Date.parse(input.to) - Date.parse(input.from) > 366 * 86400000)
     )
       fail(422, 'invalid_range', 'Choose an ordered date range of at most 367 days');
+    // Medical topics always get the deterministic clinician referral, AI or not.
+    if (medicalPattern.test(input.question))
+      return answerQuestion(input.question, state, date, input.from, input.to);
+    const to = input.to ?? date;
+    const from = input.from ?? addDays(to, -27);
+    const records = state.health_records.filter((r) => r.date >= from && r.date <= to);
+    const chatTrends = trends(state.health_records, from, to);
+    const active = state.recommendations.find((r) => r.status === 'active' && r.ends_on >= date);
+    const ai = await chatAnswer({
+      question: input.question,
+      date,
+      from,
+      to,
+      trends: chatTrends.map((t) => ({
+        metric: t.metric,
+        value: t.value,
+        unit: t.unit,
+        coverage: t.coverage,
+      })),
+      logged_days: new Set(records.map((r) => r.date)).size,
+      goals: state.goals.map((g) => g.goal),
+      recommendation: active ? { title: active.title, why: active.why } : null,
+      sample_data: records.some((r) => r.is_demo),
+    });
+    if (ai !== null)
+      return {
+        answer: ai,
+        evidence: chatTrends,
+        contains_demo_data: records.some((r) => r.is_demo),
+        mode: 'ai_chat',
+        from,
+        to,
+        notice: wellnessNotice,
+      };
     return answerQuestion(input.question, state, date, input.from, input.to);
   }
   fail(404, 'not_found', 'Endpoint not found');
