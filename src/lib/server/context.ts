@@ -11,8 +11,12 @@ export function checkOrigin(request: Request) {
     const target = new URL(request.url);
     const localHosts = new Set(['localhost', '127.0.0.1', '[::1]']);
     const sameOrigin = received.origin === target.origin;
-    const localEquivalent = localHosts.has(received.hostname) && localHosts.has(target.hostname) && received.port === target.port;
-    if (!sameOrigin && !localEquivalent) fail(403, 'cross_origin', 'Cross-origin requests are not allowed');
+    const localEquivalent =
+      localHosts.has(received.hostname) &&
+      localHosts.has(target.hostname) &&
+      received.port === target.port;
+    if (!sameOrigin && !localEquivalent)
+      fail(403, 'cross_origin', 'Cross-origin requests are not allowed');
   }
   if (request.headers.get('sec-fetch-site') === 'cross-site')
     fail(403, 'cross_origin', 'Cross-site requests are not allowed');
@@ -50,6 +54,8 @@ export async function context(
   const client = supabaseClient(token);
   const { data, error } = await client.auth.getUser(token);
   if (error || !data.user) fail(401, 'unauthorized', 'Your session has expired. Sign in again.');
+  if (!data.user.email_confirmed_at)
+    fail(403, 'email_not_confirmed', 'Confirm your email before accessing your health data.');
   return { repo: new SupabaseRepository(data.user.id, client), mode: 'supabase' };
 }
 const limits = new Map<string, { count: number; expires: number }>();

@@ -22,8 +22,8 @@ Demo mode is explicitly enabled by `PROGRESSO_DEMO_MODE=true`; missing Supabase 
 1. Create a Supabase project. Run the entire `supabase/migrations/202609180001_progresso.sql` file in its SQL editor, or apply it through the Supabase CLI migration workflow.
 2. Copy `.env.example` to `.env.local`.
 3. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (the legacy public anon key is supported too). Keep `PROGRESSO_DEMO_MODE=false`.
-4. Enable email/password authentication. Configure the Auth Site URL and allowed redirect URLs for your localhost and deployed origins. Email verification remains controlled by your Supabase project.
-5. Run `npm run dev`. Create and confirm an account, then sign in. Real accounts start with **empty histories**, never synthetic measurements.
+4. Follow [authentication setup](docs/AUTHENTICATION.md): enable email/password with **Confirm email**, configure Google OAuth, set the Site URL and `/auth/callback` redirect URLs, and install the confirmation/recovery email templates. Configure production SMTP for real users.
+5. Run `npm run dev`. Continue with Google or create and confirm an email account. New users enter onboarding automatically; returning users resume their own workspace. Real accounts start with **empty histories**, never synthetic measurements.
 6. Optional: set `OPENAI_API_KEY` and `OPENAI_MODEL` (default `gpt-4.1-mini`) for image/PDF extraction and meal-photo recognition. The user must consent to sending each file for analysis. No AI key is required for CSV/JSON/XML, manual logging, recommendations, timeline, progress, or grounded search.
 
 The migration creates `profiles`, `goals`, `uploads`, `health_records`, `meals`, `recommendations`, `recommendation_progress`, the transactional `progresso_mutate` function, and the private `health-uploads` storage bucket. **No service-role key is needed or used.**
@@ -49,6 +49,7 @@ See [API contracts](docs/API.md), [architecture decisions](docs/ARCHITECTURE.md)
 
 ## What works
 
+- Google sign-in, email confirmation/resend, password recovery, and session-aware account switching. Provider setup is required; see the [authentication guide](docs/AUTHENTICATION.md).
 - Goal-prioritized onboarding with timezone and canonical metric units.
 - Private uploads with metadata, file signatures and size validation, source tracking, extraction review, corrections, and explicit confirmation.
 - Actual CSV/JSON/XML parsing and a bounded Apple Health XML subset; optional structured vision/PDF extraction.

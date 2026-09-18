@@ -32,11 +32,13 @@
   "devDependencies": {
     "@electric-sql/pglite": "0.5.8",
     "@tailwindcss/postcss": "4.3.3",
+    "@testing-library/react": "16.3.3",
     "@types/node": "26.6.1",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "eslint": "9.39.5",
     "eslint-config-next": "16.3.5",
+    "jsdom": "26.1.0",
     "prettier": "3.9.8",
     "tailwindcss": "4.3.3",
     "typescript": "6.0.3",

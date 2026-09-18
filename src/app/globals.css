@@ -869,3 +869,157 @@ footer small {
     transform: none;
   }
 }
+
+/* Account flows share the app's quiet green palette and generous spacing. */
+.auth-panel {
+  min-width: 0;
+}
+.auth-panel h2 {
+  margin-bottom: 12px;
+}
+.auth-panel h2:focus {
+  outline: none;
+}
+.auth-intro {
+  margin-bottom: 28px;
+  overflow-wrap: anywhere;
+}
+.auth-intro strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+.auth-panel .google-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 48px;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+.google-button svg {
+  flex-shrink: 0;
+}
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--muted);
+  font-size: 12px;
+  margin: 24px 0;
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  height: 1px;
+  flex: 1;
+  background: var(--line);
+}
+.auth-fields {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.auth-fields label {
+  margin: 18px 0 7px;
+}
+.auth-fields label:first-child {
+  margin-top: 0;
+}
+.auth-fields input {
+  min-height: 48px;
+}
+.password-field {
+  position: relative;
+}
+.password-field input {
+  padding-right: 65px;
+}
+.auth-panel .password-toggle {
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  width: auto;
+  margin: 0;
+  min-height: 40px;
+  padding: 8px 10px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 12px;
+}
+.auth-panel .auth-forgot {
+  display: block;
+  width: auto;
+  margin: 8px 0 14px auto;
+  font-size: 12px;
+  color: var(--accent);
+}
+.auth-panel .auth-submit {
+  min-height: 48px;
+  margin-top: 22px;
+}
+.auth-hint {
+  font-size: 12px;
+  margin: 8px 0 0;
+}
+.auth-switch {
+  text-align: center;
+  margin: 24px 0 0;
+  font-size: 13px;
+}
+.auth-switch .text-button {
+  width: auto;
+  margin: 0;
+  padding: 6px;
+  color: var(--accent);
+  font-weight: 600;
+}
+.auth-footer {
+  text-align: center;
+  font-size: 11px;
+  margin: 28px 0 0;
+}
+.auth-feedback {
+  margin: 20px 0 0;
+}
+.auth-tip {
+  background: var(--soft);
+  border-radius: 10px;
+  padding: 16px;
+  font-size: 13px;
+  margin: 24px 0 18px;
+}
+.verification-actions button {
+  min-height: 48px;
+}
+.auth-link-button {
+  display: block;
+  text-align: center;
+  background: var(--ink);
+  color: var(--surface);
+  text-decoration: none;
+  border-radius: 10px;
+  padding: 12px 19px;
+  margin-top: 20px;
+}
+@media (max-width: 760px) {
+  .auth-welcome {
+    gap: 32px;
+    padding: 28px 20px 40px;
+  }
+  .auth-welcome .brand {
+    margin-bottom: 24px;
+  }
+  .auth-welcome h1 {
+    font-size: 40px;
+  }
+  .auth-welcome .lede,
+  .auth-welcome .welcome-note {
+    display: none;
+  }
+  .auth-panel.login.panel {
+    padding: 28px 24px;
+  }
+}

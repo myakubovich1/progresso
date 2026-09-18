@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import { AuthGate } from './auth-panel';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { api, browserSupabase } from '@/lib/client/api';
 import {
@@ -57,14 +58,16 @@ const blankItem = () => ({
   fat: 0,
 });
 export function ProgressoApp({ demo, configured }: { demo: boolean; configured: boolean }) {
+  if (demo || !configured) return <Workspace demo={demo} configured={configured} />;
+  return <AuthGate>{(id) => <Workspace key={id} demo={false} configured />}</AuthGate>;
+}
+
+function Workspace({ demo, configured }: { demo: boolean; configured: boolean }) {
   const [tab, setTab] = useState<Tab>('Today');
   const [home, setHome] = useState<Home | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [checking, setChecking] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [authMessage, setAuthMessage] = useState('');
   const [upload, setUpload] = useState<Upload | null>(null);
   const [rows, setRows] = useState<Observation[]>([]);
   const [file, setFile] = useState<File | null>(null);
@@ -128,7 +131,10 @@ export function ProgressoApp({ demo, configured }: { demo: boolean; configured: 
       .then((h) => {
         if (active) setHome(h);
       })
-      .catch(() => {})
+      .catch((e) => {
+        if (active && !demo)
+          setError(e instanceof Error ? e.message : 'We could not load your space.');
+      })
       .finally(() => {
         if (active) setChecking(false);
       });
@@ -184,20 +190,6 @@ export function ProgressoApp({ demo, configured }: { demo: boolean; configured: 
     await request('recommendations', 'POST', {});
     await load();
   };
-  const auth = (signup = false) =>
-    run(async () => {
-      setAuthMessage('');
-      const client = browserSupabase();
-      const result = signup
-        ? await client.auth.signUp({ email, password })
-        : await client.auth.signInWithPassword({ email, password });
-      if (result.error) throw result.error;
-      if (!result.data.session) {
-        setAuthMessage('Check your email to confirm your account, then sign in.');
-        return;
-      }
-      await load();
-    });
   const analyze = (kind: 'health' | 'meal') =>
     run(async () => {
       if (!file) throw new Error('Choose a file first.');
@@ -294,44 +286,31 @@ export function ProgressoApp({ demo, configured }: { demo: boolean; configured: 
               </button>
             </>
           ) : configured ? (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                void auth();
-              }}
-            >
-              <label>
-                Email
-                <input
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </label>
-              <label>
-                Password
-                <input
-                  type="password"
-                  minLength={8}
-                  autoComplete="current-password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </label>
-              <button disabled={busy}>Sign in ↗</button>
+            <>
+              <p>We couldn’t open your space. Please check your connection and try again.</p>
+              <button
+                disabled={busy}
+                onClick={() =>
+                  run(async () => {
+                    await load();
+                  })
+                }
+              >
+                Try again
+              </button>
               <button
                 className="secondary"
-                type="button"
-                disabled={busy || !email || password.length < 8}
-                onClick={() => auth(true)}
+                disabled={busy}
+                onClick={() =>
+                  run(async () => {
+                    const { error } = await browserSupabase().auth.signOut({ scope: 'local' });
+                    if (error) throw error;
+                  })
+                }
               >
-                Create account
+                Back to sign in
               </button>
-              {authMessage && <p role="status">{authMessage}</p>}
-            </form>
+            </>
           ) : (
             <p>
               The app needs its connection configured before sign-in is available. Follow the
@@ -382,8 +361,9 @@ export function ProgressoApp({ demo, configured }: { demo: boolean; configured: 
             className="text-button"
             onClick={() =>
               run(async () => {
-                await browserSupabase().auth.signOut();
-                setHome(null);
+                const { error } = await browserSupabase().auth.signOut({ scope: 'local' });
+                if (error) throw error;
+                // AuthGate unmounts this entire workspace, clearing all user-specific state.
               })
             }
           >

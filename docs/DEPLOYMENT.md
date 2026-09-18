@@ -4,6 +4,8 @@
 
 Use Node 24 LTS. `npm ci`, `npm run build`, and `npm start` produce/run the Next.js server. Deploy it to a Next.js-compatible Node host; do not use static export. Configure the public Supabase URL/key before building, and the optional AI key as a server secret. Never set demo mode on a public deployment. Run the migration once against the intended Supabase project and configure Auth origins.
 
+See [authentication setup and live acceptance checks](AUTHENTICATION.md) for Google OAuth, mandatory email confirmation, SMTP, and email templates.
+
 ## Before a real-user launch
 
 - Exercise signup, email confirmation, login, logout, and token expiry against hosted Supabase.

@@ -7,7 +7,7 @@ export function browserSupabase() {
   const key =
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) throw new Error('Supabase is not configured');
-  client = createClient(url, key);
+  client = createClient(url, key, { auth: { flowType: 'pkce', detectSessionInUrl: false } });
   return client;
 }
 export async function api<T>(path: string, init: RequestInit = {}, demo = false): Promise<T> {
