@@ -56,12 +56,16 @@ function findUpload(state: State, id: string) {
   if (!upload) fail(404, 'not_found', 'Upload not found');
   return upload;
 }
+// An extraction that never read the file: sample recognition, or manual entry
+// without consent. Such an upload can be re-analyzed even after confirmation.
+const unreadExtraction = (upload: Upload) =>
+  upload.extraction?.mode === 'demo' || upload.extraction?.mode === 'manual';
 async function analyzeUpload(
   repo: Repository,
   upload: Upload,
   options: z.infer<typeof analyzeInput>,
 ) {
-  if (upload.status === 'confirmed')
+  if (upload.status === 'confirmed' && !unreadExtraction(upload))
     fail(409, 'already_confirmed', 'Confirmed uploads cannot be reanalyzed');
   try {
     const bytes = await repo.getFile(upload.storage_path);
@@ -275,6 +279,13 @@ async function dispatch(request: NextRequest, segments: string[]) {
     const hash = createHash('sha256').update(content).digest('hex');
     const existing = state.uploads.find((u) => u.sha256 === hash && u.kind === kind);
     if (existing) {
+      if (!options.demo && options.consent && existing.status === 'confirmed' && unreadExtraction(existing)) {
+        // The same file was previously confirmed using sample recognition or
+        // manual entry. Re-analyze the stored upload now that the user asked
+        // for a real AI read of the file. Report it as a fresh analysis so the
+        // client does not trigger a second AI call for the same request.
+        return { upload: await analyzeUpload(repo, existing, options), duplicate: false };
+      }
       if (existing.status === 'failed') {
         // A failed storage write must be recoverable with the same file hash.
         const storage_path = `${repo.userId}/${randomUUID()}`;
