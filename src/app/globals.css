@@ -229,6 +229,10 @@ small {
   background: var(--soft);
   color: var(--ink);
 }
+.nav:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
 .nav-icon {
   font-size: 19px;
   width: 20px;

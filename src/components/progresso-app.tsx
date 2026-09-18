@@ -358,6 +358,8 @@ export function ProgressoApp({ demo, configured }: { demo: boolean; configured: 
             <button
               key={name}
               className={tab === name ? 'nav active' : 'nav'}
+              disabled={!home.profile && name !== 'Today'}
+              title={home.profile ? undefined : 'Complete onboarding to unlock this tab'}
               onClick={() => {
                 setTab(name);
                 setError('');
